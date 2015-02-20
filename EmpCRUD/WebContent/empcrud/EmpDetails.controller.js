@@ -1,212 +1,198 @@
-sap.ui.controller("empcrud.EmpDetails", {
+sap.ui.controller("employeeodata.EmployeeDetails", {
+	
+	getServiceUrl : function() {
+		return "http://fis54.fis-gmbh.de:8000/sap/opu/odata/sap/zmk_emp_srv";
+	},
 
-	/**
-	* Called when a controller is instantiated and its View controls (if available) are already created.
-	* Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
-	* @memberOf empcrud.EmpDetails
-	*/
-	            onInit: function() {
-	               
-	                        var sServiceUrl = "http://<host name>:<port no>/sap/opu/odata/sap/ZMM_EMP_SRV";
-	                        var oModel = new sap.ui.model.odata.ODataModel(sServiceUrl,true);
-	        
-	                        var oJsonModel = new sap.ui.model.json.JSONModel();
-	        
-	        oModel.read("/EmployeeSet?",null,null,true,function(oData,repsonse){
-	            oJsonModel.setData(oData);
-	     });   
-	     sap.ui.getCore().setModel(oJsonModel);
-	 
-	            },
-	 
-	/**
-	* Similar to onAfterRendering, but this hook is invoked before the controller's View is re-rendered
-	* (NOT before the first rendering! onInit() is used for that one!).
-	* @memberOf empcrud.EmpDetails
-	*/
-//	          onBeforeRendering: function() {
-	//
-//	          },
-	 
-	/**
-	* Called when the View has been rendered (so its HTML is part of the document). Post-rendering manipulations of the HTML could be done here.
-	* This hook is the same one that SAPUI5 controls get after being rendered.
-	* @memberOf empcrud.EmpDetails
-	*/
-//	          onAfterRendering: function() {
-	//
-//	          },
-	 
-	/**
-	* Called when the Controller is destroyed. Use this one to free resources and finalize activities.
-	* @memberOf empcrud.EmpDetails
-	*/
-//	          onExit: function() {
-	//
-//	          }
-	            ItemPress: function(evt) {
-	                        sap.ui.getCore().byId("Dialog").open();                    
-	                        sap.ui.getCore().byId("Update").setVisible(true);
-	                        sap.ui.getCore().byId("Delete").setVisible(true);
-	 
-	        
-	                        var oSelectedItem = evt.getParameter("listItem");
-	                        var sID = oSelectedItem.getBindingContext().getProperty("Empid");
-	                        var sName = oSelectedItem.getBindingContext().getProperty("Empname");
-	                        var sAddr = oSelectedItem.getBindingContext().getProperty("Empadd");
-	                        var sRole = oSelectedItem.getBindingContext().getProperty("Empdes");
-	        
-	                        sap.ui.getCore().byId("Id").setValue(sID);
-	                        sap.ui.getCore().byId("Name").setValue(sName);
-	                        sap.ui.getCore().byId("Address").setValue(sAddr);
-	                        sap.ui.getCore().byId("Role").setValue(sRole);
-	                        sap.ui.getCore().byId("Id").setEnabled(false);
-	                        },
-	        
-	                        NewEntry: function() {
-	                        sap.ui.getCore().byId("Dialog").open();
-	                        sap.ui.getCore().byId("Save").setVisible(true);
-	                        sap.ui.getCore().byId("Update").setVisible(false);
-	                        sap.ui.getCore().byId("Delete").setVisible(false);
-	                        sap.ui.getCore().byId("Id").setValue("");
-	                        sap.ui.getCore().byId("Name").setValue("");
-	                        sap.ui.getCore().byId("Address").setValue("");
-	                        sap.ui.getCore().byId("Role").setValue("");                
-	                        sap.ui.getCore().byId("Id").setEnabled(true);
-	                        },                     
-	        
-	Save: function() {
-	             
-	            var oEntry = {};
-	            oEntry.Empid= sap.ui.getCore().byId("Id").getValue();
-	            oEntry.Empname= sap.ui.getCore().byId("Name").getValue();
-	            oEntry.Empadd= sap.ui.getCore().byId("Address").getValue();
-	            oEntry.Empdes= sap.ui.getCore().byId("Role").getValue();   
-	 
-	            OData.request({
-	                        requestUri : "http://<host name>:<port no>/sap/opu/odata/sap/ZMM_EMP_SRV/EmployeeSet",
-	                        method : "GET",
-	                        headers : {
-	                                                "X-Requested-With" : "XMLHttpRequest",
-	                                                "Content-Type" : "application/atom+xml",
-	                                                "DataServiceVersion" : "2.0",
-	                                                "X-CSRF-Token" : "Fetch"
-	                                                }
-	                                    },
-	                                    function(data, response) {
-	                                                header_xcsrf_token = response.headers['x-csrf-token'];
-	                                                var oHeaders = {
-	                                                            "x-csrf-token" : header_xcsrf_token,
-	                                                            'Accept' : 'application/json',
-	                                    };
-	 
-	                        OData.request({
-	                                                requestUri : "http://<host name>:<port no>/sap/opu/odata/sap/ZMM_EMP_SRV/EmployeeSet",
-	 
-	                                                method : "POST",
-	                                                headers : oHeaders,
-	                                                data:oEntry
-	                                    },
-	                                                function(data,request) {
-	                                                alert("Employee Created Successfully");        
-	                                                location.reload(true);
-	                                    },          function(err) {
-	                                                alert("Employee Creation Failed");
-	                                    });
-	                        }, function(err) {
-	                                                var request = err.request;
-	                                                var response = err.response;
-	                                                alert("Error in Get -- Request " + request + " Response " + response);
-	                                    });                                              
-	                                                            },
-	Update: function() {
-	                        var oEntry = {};
-	                        oEntry.Empid= sap.ui.getCore().byId("Id").getValue();
-	                        oEntry.Empname= sap.ui.getCore().byId("Name").getValue();
-	                        oEntry.Empadd= sap.ui.getCore().byId("Address").getValue();
-	                        oEntry.Empdes= sap.ui.getCore().byId("Role").getValue();   
-	        
-	                        OData.request({
-	                                    requestUri : "http://<host name>:<port no>/sap/opu/odata/sap/ZMM_EMP_SRV/EmployeeSet",
-	                                    method : "GET",
-	                                    headers : {
-	                                                            "X-Requested-With" : "XMLHttpRequest",
-	                                                            "Content-Type" : "application/atom+xml",
-	                                                            "DataServiceVersion" : "2.0",
-	                                                            "X-CSRF-Token" : "Fetch"
-	                                                            }
-	                                                },
-	                                                function(data, response) {
-	                                                            header_xcsrf_token = response.headers['x-csrf-token'];
-	                                                            var oHeaders = {
-	                                                                        "x-csrf-token" : header_xcsrf_token,
-	                                                                        'Accept' : 'application/json',
-	                                                };
-	 
-	                                    OData.request({
-	                                                            requestUri : "http://<host name>:<port no>/sap/opu/odata/sap/ZMM_EMP_SRV/EmployeeSet('"+oEntry.Empid+"')",
-	 
-	                                                            method : "PUT",
-	                                                            headers : oHeaders,
-	                                                            data:oEntry
-	                                                },
-	                                                            function(data,request) {
-	                                                            alert("Update Success");           
-	                                                            location.reload(true);
-	                                                },          function(err) {
-	                                                            alert("Update Failed");
-	                                                });
-	                                    }, function(err) {
-	                                                            var request = err.request;
-	                                                            var response = err.response;
-	                                                            alert("Error in Get -- Request " + request + " Response " + response);
-	                                                });        
-	                                                },
-	// Delete Action                                           
-	Delete: function() {
-	            var oEntry = {};
-	            oEntry.Empid= sap.ui.getCore().byId("Id").getValue();
-	 
-	            OData.request({
-	                        requestUri : "http://<host name>:<port no>/sap/opu/odata/sap/ZMM_EMP_SRV/EmployeeSet('" + oEntry.Empid + "')",
-	                        method : "GET",
-	                        headers : {
-	                                                "X-Requested-With" : "XMLHttpRequest",
-	                                                "Content-Type" : "application/atom+xml",
-	                                                "DataServiceVersion" : "2.0",
-	                                                "X-CSRF-Token" : "Fetch"
-	                                                }
-	                                    },
-	                                    function(data, response) {
-	                                                header_xcsrf_token = response.headers['x-csrf-token'];
-	                                                var oHeaders = {
-	                                                            "x-csrf-token" : header_xcsrf_token,
-	                                                            'Accept' : 'application/json',
-	                                    };
-	 
-	                        OData.request({
-	                                                requestUri : "http://<host name>:<port no>/sap/opu/odata/sap/ZMM_EMP_SRV/EmployeeSet('"+oEntry.Empid+"')",
-	 
-	                                                method : "DELETE",
-	                                                headers : oHeaders,
-	                                                data:oEntry
-	                                    },
-	                                                function(data,request) {
-	                                                alert("Delete Success");           
-	                                                location.reload(true);
-	                                    },          function(err) {
-	                                                alert("Delete Failed");
-	                                    });
-	                        }, function(err) {
-	                                                var request = err.request;
-	                                                var response = err.response;
-	                                                alert("Error in Get -- Request " + request + " Response " + response);
-	                                    });        
-	         
-	                              },
-	// Cancel Action                         
-	  Cancel:function() {
-	                            sap.ui.getCore().byId("Dialog").close();
-	                                       }
-	 
-	})
+/**
+* Called when a controller is instantiated and its View controls (if available) are already created.
+* Can be used to modify the View before it is displayed, to bind event handlers and do other one-time initialization.
+* @memberOf employeeodata.EmployeeDetails
+*/
+	onInit: function() {
+		var serviceUrl = this.getServiceUrl();
+
+		var applicationModel = new sap.ui.model.odata.ODataModel(serviceUrl, true);
+
+		var jsonModel = new sap.ui.model.json.JSONModel();
+		
+		applicationModel.read("/EmployeeSet?", null, null, true, function(oData, response) {
+			jsonModel.setData(oData);
+		});
+		sap.ui.getCore().setModel(jsonModel);
+
+	},
+
+	itemPress: function(evt) {
+		sap.ui.getCore().byId("Dialog").open();
+		sap.ui.getCore().byId("Update").setVisible(true);
+		sap.ui.getCore().byId("Delete").setVisible(true);
+		sap.ui.getCore().byId("Save").setVisible(false);
+		
+		var selectedItem = evt.getParameter("listItem");
+		var employeeId = selectedItem.getBindingContext().getProperty("Empid");
+		var employeeName = selectedItem.getBindingContext().getProperty("Empname");
+		var employeeAddress = selectedItem.getBindingContext().getProperty("Empadd");
+		var employeeRole = selectedItem.getBindingContext().getProperty("Empdes");
+		
+		sap.ui.getCore().byId("Id").setValue(employeeId);
+		sap.ui.getCore().byId("Id").setEnabled(false);
+		
+		sap.ui.getCore().byId("Name").setValue(employeeName);
+		sap.ui.getCore().byId("Address").setValue(employeeAddress);
+		sap.ui.getCore().byId("Role").setValue(employeeRole);
+	},
+	
+	newEntry: function(evt) {
+        	sap.ui.getCore().byId("Dialog").open();
+        	sap.ui.getCore().byId("Save").setVisible(true);
+        	sap.ui.getCore().byId("Update").setVisible(false);
+        	sap.ui.getCore().byId("Delete").setVisible(false);
+        	sap.ui.getCore().byId("Id").setValue("");
+        	sap.ui.getCore().byId("Name").setValue("");
+        	sap.ui.getCore().byId("Address").setValue("");
+        	sap.ui.getCore().byId("Role").setValue("");                
+        	sap.ui.getCore().byId("Id").setEnabled(true);
+	},
+	
+	updateEmployee: function() {
+		var newEntry = {};
+		newEntry.Empid = sap.ui.getCore().byId("Id").getValue();
+		newEntry.Empname = sap.ui.getCore().byId("Name").getValue();
+		newEntry.Empadd = sap.ui.getCore().byId("Address").getValue();
+		newEntry.Empdes = sap.ui.getCore().byId("Role").getValue();
+		
+		console.log(newEntry);
+		var getServiceUrl = this.getServiceUrl() + "/EmployeeSet";
+		OData.request({
+			requestUri : getServiceUrl,
+			method: "GET",
+			headers: {
+				"X-Requested-With" : "XMLHttpRequest",
+				"Content-Type" : "application/atom+xml",
+				"DataServiceVersion" : "2.0",
+				"X-CSRF-Token": "Fetch"
+			}
+		},
+		function(data, response) {
+			var header_xcsrf_token = response.headers['x-csrf-token'];
+			var oHeaders = {
+					"x-csrf-token" : header_xcsrf_token,
+					"Accept" : "application/json",
+			};
+			var extServiceUrl = getServiceUrl + "('" + newEntry.Empid + "')";
+			OData.request({
+				requestUri : extServiceUrl,
+				method : "PUT",
+				headers: oHeaders,
+				data: newEntry
+			},
+			function(data, request) {
+				console.log("Updated Successfully");
+				location.reload(true);
+			},
+			function(err) {
+				console.log("Update Failed");
+			});
+		},
+		function(err) {
+			var request = err.request;
+			var response = err.response;
+			console.log("Error in Get -- Request " + request + " Response " + response);
+		});
+	},
+	
+	deleteEmployee : function() {
+		var currentEntry = {};
+		currentEntry.Empid = sap.ui.getCore().byId("Id").getValue();
+		
+		var getServiceUrl = this.getServiceUrl() + "/EmployeeSet('" + currentEntry.Empid + "')";
+		OData.request({
+			requestUri : getServiceUrl,
+			method: "GET",
+			headers: {
+				"X-Requested-With" : "XMLHttpRequest",
+				"Content-Type" : "application/atom+xml",
+				"DataServiceVersion" : "2.0",
+				"X-CSRF-Token": "Fetch"
+			}
+		},
+		function(data, response) {
+			var header_xcsrf_token = response.headers['x-csrf-token'];
+			var oHeaders = {
+					"x-csrf-token" : header_xcsrf_token,
+					"Accept" : "application/json",
+			};
+			var extServiceUrl = getServiceUrl;
+			OData.request({
+				requestUri : extServiceUrl,
+				method : "DELETE",
+				headers: oHeaders,
+				data: currentEntry
+			},
+			function(data, request) {
+				console.log("Deleted Successfully");
+				location.reload(true);
+			},
+			function(err) {
+				console.log("Deletion Failed");
+			});
+		},
+		function(err) {
+			var request = err.request;
+			var response = err.response;
+			console.log("Error in Get -- Request " + request + " Response " + response);
+		});
+	},
+	
+	cancelAction : function() {
+		sap.ui.getCore().byId("Dialog").close();
+	},
+	
+	saveEmployee : function() {
+		var newEntry = {};
+		newEntry.Empid = sap.ui.getCore().byId("Id").getValue();
+		newEntry.Empname = sap.ui.getCore().byId("Name").getValue();
+		newEntry.Empadd = sap.ui.getCore().byId("Address").getValue();
+		newEntry.Empdes = sap.ui.getCore().byId("Role").getValue();
+		
+		var getServiceUrl = this.getServiceUrl() + "/EmployeeSet";
+		OData.request({
+			requestUri : getServiceUrl,
+			method: "GET",
+			headers: {
+				"X-Requested-With" : "XMLHttpRequest",
+				"Content-Type" : "application/atom+xml",
+				"DataServiceVersion" : "2.0",
+				"X-CSRF-Token": "Fetch"
+			}
+		},
+		function(data, response) {
+			var header_xcsrf_token = response.headers['x-csrf-token'];
+			var oHeaders = {
+					"x-csrf-token" : header_xcsrf_token,
+					"Accept" : "application/json",
+			};
+			var extServiceUrl = getServiceUrl;
+			OData.request({
+				requestUri : extServiceUrl,
+				method : "POST",
+				headers: oHeaders,
+				data: newEntry
+			},
+			function(data, request) {
+				console.log("Created Successfully");
+				location.reload(true);
+			},
+			function(err) {
+				console.log("Creation Failed");
+			});
+		},
+		function(err) {
+			var request = err.request;
+			var response = err.response;
+			console.log("Error in Get -- Request " + request + " Response " + response);
+		});
+	}
+
+});
